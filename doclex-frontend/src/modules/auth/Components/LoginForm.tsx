@@ -11,17 +11,62 @@ import {
 import { useState } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import type { AuthResponse } from "../../../types/Main.interface";
+
+// interface LoginState {
+//   email: string;
+//   password: string;
+// }
+
+
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const navigate=useNavigate();
+  const handleSubmit =async (e:any) => {
+     setLoading(true);
+     console.log()
     e.preventDefault();
+    const payload={
+        email,
+        password
+    }
+   try{
+    const response= await axios.post<AuthResponse>(`${import.meta.env.VITE_BASE_URL}/api/auth/login`,payload);
+     console.log("This is response",response);
 
-    setLoading(true);
+      localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("RefreshToken",response.data.refreshToken);
+
+
+     if(response.status===200){
+       if (response.data.user.role === "LAWYER") {
+        localStorage.setItem("firstName",response.data.user.firstName);
+        localStorage.setItem("LastName",response.data.user.lastName);
+      navigate("/lawyer");
+    } else {
+         localStorage.setItem("firstName",response.data.user.firstName);
+        localStorage.setItem("LastName",response.data.user.lastName);
+      navigate("/user");
+    }
+}
+
+  
+
+   }
+   catch(err){
+    console.log('This is err',err);
+   }
+   finally{
+    setLoading(false);
+   }
+
+   
 
     console.log({ email, password });
 

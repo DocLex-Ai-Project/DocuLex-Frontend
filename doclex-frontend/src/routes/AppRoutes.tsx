@@ -1,4 +1,4 @@
-import {  Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import LoginPage from "../modules/auth/Pages/LoginPage";
 import SignupPage from "../modules/auth/Pages/SignupPage";
@@ -6,33 +6,53 @@ import SignupPage from "../modules/auth/Pages/SignupPage";
 import { Suspense } from "react";
 import LoadingScreen from "../components/LoadingScreen";
 import AuthLayout from "../layouts/AuthLayout";
+import UserDashboardLayout from "../layouts/UserDashboardLayout";
+import UserDashboard from "../modules/auth/Pages/User/UserDashboard";
+import ProtectedRoute from "./ProtectedRoutes";
+import NotFound from "../components/NotFound";
 
 const AppRoutes = () => {
-  return (
-<>
+    return (
+        <>
 
-<Suspense
-fallback={
-    <LoadingScreen 
-    message="Loading,please Wait"
-    animation="default"/>
-}
->
-      <Routes>
+            <Suspense
+                fallback={
+                    <LoadingScreen
+                        message="Loading,please Wait"
+                        animation="default" />
+                }
+            >
+                <Routes>
 
-        <Route path="" element={<AuthLayout />}>
+                    {/* Auth Pages */}
+                    <Route element={<AuthLayout />}>
 
-          <Route path="" element={<LoginPage/>} />
-          <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/" element={<LoginPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
 
-        </Route>
+                    </Route>
 
-      </Routes>
+                    {/* User Protected Route */}
+                    <Route
+                        path="/user"
+                        element={
+                            <ProtectedRoute>
+                                <UserDashboardLayout />
+                            </ProtectedRoute>
+                        }
+                    >
+                        <Route index element={<UserDashboard />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Route>
 
-      </Suspense>
+                    <Route path="*" element={<NotFound />} />
 
-   </>
-  )
+                </Routes>
+
+            </Suspense>
+
+        </>
+    )
 };
 
 export default AppRoutes;

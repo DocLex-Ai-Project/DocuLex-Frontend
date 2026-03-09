@@ -4,7 +4,7 @@ import AppRoutes from "./routes/AppRoutes";
 
 const App = () => {
 
-
+// later need to complusory
 
 //   useEffect(() => {
 //   const verifyUser = async () => {

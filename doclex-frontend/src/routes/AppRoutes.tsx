@@ -10,6 +10,8 @@ import UserDashboardLayout from "../layouts/UserDashboardLayout";
 import UserDashboard from "../modules/auth/Pages/User/UserDashboard";
 import ProtectedRoute from "./ProtectedRoutes";
 import NotFound from "../components/NotFound";
+import LawayerLayout from "../layouts/LawayerLayout";
+import LawyerDashboard from "../modules/auth/Pages/Lawyer/LawayerDashboard";
 
 const AppRoutes = () => {
     return (
@@ -42,6 +44,18 @@ const AppRoutes = () => {
                         }
                     >
                         <Route index element={<UserDashboard />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Route>
+
+                     <Route
+                        path="/lawyer"
+                        element={
+                            <ProtectedRoute>
+                            <LawayerLayout/>
+                            </ProtectedRoute>
+                        }
+                    >
+                        <Route index element={<LawyerDashboard />} />
                         <Route path="*" element={<NotFound />} />
                     </Route>
 

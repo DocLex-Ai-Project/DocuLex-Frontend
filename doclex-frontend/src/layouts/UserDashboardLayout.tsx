@@ -1,54 +1,29 @@
-import { ThemeProvider } from "@mui/material/styles";
-import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
-
-import LoadingScreen from "../components/LoadingScreen";
 import UserSidebar from "../components/navigation/User/UserSidebar";
-
-
-import { lightTheme, darkTheme } from "../index.mui";
 import UserNavbar from "../components/navigation/User/ UserNavbar";
 
 const UserDashboardLayout = () => {
-  const theme = localStorage.getItem("theme") || "light";
-
-  const style = {
-    backgroundColor: theme === "light" ? "#F9FAFB" : "#1c1c1c",
-  };
-
   return (
-    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
-      <div className="flex w-full min-h-screen">
+    // Parent container: exactly the size of the screen, no scrolling on the body
+    <div className="flex w-screen h-screen bg-slate-50  overflow-hidden">
+      
+      {/* 1. Sidebar - It acts as a solid physical block on desktop */}
+      <UserSidebar />
 
-        {/* Sidebar */}
-        <div className="hidden md:block w-[260px]">
-          <UserSidebar />
-        </div>
-
-        {/* Main Content */}
-        <div
-          className="flex flex-col flex-1 overflow-hidden"
-          style={style}
-        >
-
-          {/* Navbar */}
-          <UserNavbar />
-
-          {/* Page Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <Suspense
-              fallback={
-                <LoadingScreen message="Loading..." animation="default" />
-              }
-            >
-              <Outlet />
-            </Suspense>
-          </div>
-
-        </div>
+      {/* 2. Main Content Wrapper - Takes exactly the remaining space */}
+      <div className="flex flex-col flex-1 min-w-0 h-full">
+        
+        {/* Navbar sits at the top */}
+        <UserNavbar />
+        
+        {/* Scrollable Content Area for your pages */}
+        <main className="flex-1 overflow-y-auto p-6 relative">
+          <Outlet />
+        </main>
 
       </div>
-    </ThemeProvider>
+      
+    </div>
   );
 };
 

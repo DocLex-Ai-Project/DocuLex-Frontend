@@ -36,15 +36,9 @@ const collapsedWidth = 72;
 const navItems = [
 { text: "Dashboard", icon: <Dashboard />, path: "/user" },
 
-{ text: "Create Document", icon: <Description />, path: "/user/create" },
+{ text: "Create / Upload Document", icon: <Description />, path: "/user/create" },
 
 { text: "My Documents", icon: <FolderShared />, path: "/user/documents" },
-
-{ text: "Upload & Scan", icon: <UploadFile />, path: "/user/upload" },
-
-{ text: "AI Review Results", icon: <SmartToy />, path: "/user/ai-review" },
-
-{ text: "Request Lawyer Review", icon: <RateReview />, path: "/user/request-review" },
 
 { text: "Settings", icon: <Settings />, path: "/user/settings" },
 

@@ -48,10 +48,12 @@ const LoginForm = () => {
        if (response.data.user.role === "LAWYER") {
         localStorage.setItem("firstName",response.data.user.firstName);
         localStorage.setItem("LastName",response.data.user.lastName);
+        localStorage.setItem('role',response.data.user.role)
       navigate("/lawyer");
     } else {
          localStorage.setItem("firstName",response.data.user.firstName);
         localStorage.setItem("LastName",response.data.user.lastName);
+          localStorage.setItem('role',response.data.user.role)
       navigate("/user");
     }
 }

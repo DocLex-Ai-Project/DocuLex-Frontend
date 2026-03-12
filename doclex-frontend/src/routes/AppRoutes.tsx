@@ -1,72 +1,85 @@
 import { Routes, Route } from "react-router-dom";
+import { Suspense } from "react";
 
 import LoginPage from "../modules/auth/Pages/LoginPage";
 import SignupPage from "../modules/auth/Pages/SignupPage";
-// import CommonOutlet from "../components/ CommonOutlet";
-import { Suspense } from "react";
-import LoadingScreen from "../components/LoadingScreen";
+
 import AuthLayout from "../layouts/AuthLayout";
 import UserDashboardLayout from "../layouts/UserDashboardLayout";
+import LawyerLayout from "../layouts/LawayerLayout";
+
 import UserDashboard from "../modules/auth/Pages/User/UserDashboard";
-import ProtectedRoute from "./ProtectedRoutes";
-import NotFound from "../components/NotFound";
-import LawayerLayout from "../layouts/LawayerLayout";
 import LawyerDashboard from "../modules/auth/Pages/Lawyer/LawayerDashboard";
 
+import CreateDocumentPage from "../modules/documents/pages/CreateDocumentPage";
+import DocumentsPage from "../modules/documents/pages/DocumentsPage";
+import EditorPage from "../modules/documents/Editorpage";
+import SettingsPage from "../modules/documents/pages/SettingPage";
+
+import ProtectedRoute from "./ProtectedRoutes";
+import LoadingScreen from "../components/LoadingScreen";
+import NotFound from "../components/NotFound";
+
 const AppRoutes = () => {
-    return (
-        <>
+  return (
+    <Suspense
+      fallback={
+        <LoadingScreen message="Loading, please wait" animation="default" />
+      }
+    >
+      <Routes>
 
-            <Suspense
-                fallback={
-                    <LoadingScreen
-                        message="Loading,please Wait"
-                        animation="default" />
-                }
-            >
-                <Routes>
+        {/* AUTH ROUTES */}
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+        </Route>
 
-                    {/* Auth Pages */}
-                    <Route element={<AuthLayout />}>
+        {/* USER ROUTES */}
+        <Route
+          path="/user"
+          element={
+            <ProtectedRoute role={"USER"}>
+              <UserDashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<UserDashboard />} />
 
-                        <Route path="/" element={<LoginPage />} />
-                        <Route path="/signup" element={<SignupPage />} />
+          {/* Create or Upload */}
+          <Route path="create" element={<CreateDocumentPage />} />
 
-                    </Route>
+          {/* Document center */}
+          <Route path="documents" element={<DocumentsPage />} />
 
-                    {/* User Protected Route */}
-                    <Route
-                        path="/user"
-                        element={
-                            <ProtectedRoute>
-                                <UserDashboardLayout />
-                            </ProtectedRoute>
-                        }
-                    >
-                        <Route index element={<UserDashboard />} />
-                        <Route path="*" element={<NotFound />} />
-                    </Route>
+          {/* Word editor */}
+          <Route path="editor" element={<EditorPage />} />
 
-                     <Route
-                        path="/lawyer"
-                        element={
-                            <ProtectedRoute>
-                            <LawayerLayout/>
-                            </ProtectedRoute>
-                        }
-                    >
-                        <Route index element={<LawyerDashboard />} />
-                        <Route path="*" element={<NotFound />} />
-                    </Route>
+          {/* Settings */}
+          <Route path="settings" element={<SettingsPage />} />
 
-                    <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
 
-                </Routes>
+        {/* LAWYER ROUTES */}
+        <Route
+          path="/lawyer"
+          element={
+            <ProtectedRoute role={"LAWYER"}>
+              <LawyerLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<LawyerDashboard />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
 
-            </Suspense>
+        {/* GLOBAL 404 */}
+        <Route path="*" element={<NotFound />} />
 
-        </>
-    )
+      </Routes>
+    </Suspense>
+  );
 };
 
 export default AppRoutes;

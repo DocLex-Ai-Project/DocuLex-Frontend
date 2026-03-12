@@ -1,5 +1,5 @@
 import axios from "axios";
-import { refreshAccessToken } from "./authService";
+import { refreshAccessToken } from "../services/RefreshToken.service";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
 
 // Attach token
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

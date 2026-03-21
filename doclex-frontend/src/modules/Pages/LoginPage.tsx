@@ -1,6 +1,6 @@
 import { Box, Typography, Divider, Link } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import LoginForm from "../Components/LoginForm";
+import LoginForm from "../auth/Components/LoginForm";
 
 const LoginPage = () => {
   return (

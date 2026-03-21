@@ -1,24 +1,27 @@
 import { Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 
-import LoginPage from "../modules/auth/Pages/LoginPage";
-import SignupPage from "../modules/auth/Pages/SignupPage";
+import LoginPage from "../modules/Pages/LoginPage";
+import SignupPage from "../modules/Pages/SignupPage";
 
 import AuthLayout from "../layouts/AuthLayout";
 import UserDashboardLayout from "../layouts/UserDashboardLayout";
 import LawyerLayout from "../layouts/LawayerLayout";
 
-import UserDashboard from "../modules/auth/Pages/User/UserDashboard";
-import LawyerDashboard from "../modules/auth/Pages/Lawyer/LawayerDashboard";
+import UserDashboard from "../modules/Pages/User/UserDashboard";
+import LawyerDashboard from "../modules/Pages/Lawyer/LawayerDashboard";
 
 import CreateDocumentPage from "../modules/documents/pages/CreateDocumentPage";
-import DocumentsPage from "../modules/documents/pages/DocumentsPage";
+
 import EditorPage from "../modules/documents/Editorpage";
 import SettingsPage from "../modules/documents/pages/SettingPage";
 
 import ProtectedRoute from "./ProtectedRoutes";
 import LoadingScreen from "../components/LoadingScreen";
 import NotFound from "../components/NotFound";
+import MyDocumentsPage from "../modules/Pages/User/MyDocuments";
+import ReviewQueuePage from "../modules/Pages/Lawyer/ReviewQueuePage";
+import MyAssignmentsPage from "../modules/Pages/Lawyer/MyAssignmentsPage";
 
 const AppRoutes = () => {
   return (
@@ -50,7 +53,7 @@ const AppRoutes = () => {
           <Route path="create" element={<CreateDocumentPage />} />
 
           {/* Document center */}
-          <Route path="documents" element={<DocumentsPage />} />
+          <Route path="documents" element={<MyDocumentsPage />} />
 
           {/* Word editor */}
           <Route path="editor" element={<EditorPage />} />
@@ -71,6 +74,8 @@ const AppRoutes = () => {
           }
         >
           <Route index element={<LawyerDashboard />} />
+        <Route path="review-requests" element={<ReviewQueuePage/>} />
+        <Route path="cases" element={<MyAssignmentsPage/>}/>
           <Route path="*" element={<NotFound />} />
         </Route>
 

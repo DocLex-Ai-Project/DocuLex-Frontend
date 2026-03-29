@@ -14,6 +14,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import type { AuthResponse } from "../../../types/Main.interface";
+import { enqueueSnackbar } from "notistack";
 
 // interface LoginState {
 //   email: string;
@@ -62,6 +63,7 @@ const LoginForm = () => {
 
    }
    catch(err){
+    enqueueSnackbar('Wrong Password or userName',{variant:'error'})
     console.log('This is err',err);
    }
    finally{
@@ -169,35 +171,38 @@ const LoginForm = () => {
             Forgot password?
           </Link>
         </Typography>
+<Button
+  type="submit"
+  fullWidth
+  variant="contained" // <-- Added this
+  disabled={loading}
+  sx={{
+    height: 50,
+    borderRadius: 3,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: 15,
+    color: "#ffffff", // <-- Added this to make text visible
 
-        <Button
-          type="submit"
-          fullWidth
-          disabled={loading}
-          sx={{
-            height: 50,
-            borderRadius: 3,
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: 15,
+    background: "linear-gradient(135deg,#6366f1 0%, #4f46e5 100%)",
+    boxShadow: "0 10px 30px rgba(99,102,241,0.35)",
+    transition: "all 0.25s ease",
 
-            background:
-              "linear-gradient(135deg,#6366f1 0%, #4f46e5 100%)",
-
-            boxShadow: "0 10px 30px rgba(99,102,241,0.35)",
-
-            transition: "all 0.25s ease",
-
-            "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: "0 15px 40px rgba(99,102,241,0.45)",
-              background:
-                "linear-gradient(135deg,#4f46e5 0%, #4338ca 100%)",
-            },
-          }}
-        >
-          {loading ? "Signing in..." : "Sign in"}
-        </Button>
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0 15px 40px rgba(99,102,241,0.45)",
+      background: "linear-gradient(135deg,#4f46e5 0%, #4338ca 100%)",
+    },
+    
+    "&.Mui-disabled": { 
+      background: "rgba(0, 0, 0, 0.12)",
+      color: "rgba(0, 0, 0, 0.26)",
+      boxShadow: "none",
+    }
+  }}
+>
+  {loading ? "Signing in..." : "Sign in"}
+</Button>
       </Stack>
     </Box>
   );

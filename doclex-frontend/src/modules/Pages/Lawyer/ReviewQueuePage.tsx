@@ -45,7 +45,7 @@ const [previewOpen, setPreviewOpen] = useState(false);
   const fetchDocs = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/api/documents/review-queue");
+      const res = await axiosInstance.get("/api/lawyer/review-queue");
       setDocs(res.data);
     } catch (error) {
       console.error("Failed to fetch queue", error);
@@ -70,7 +70,7 @@ const [previewOpen, setPreviewOpen] = useState(false);
   const handleConfirmAssign = async () => {
     try {
       setLoadingAction(true);
-      await axiosInstance.post(`/api/documents/${selectedId}/assign`);
+      await axiosInstance.post(`/api/lawyer/${selectedId}/assign`);
       setConfirmOpen(false);
       
       // Refresh the table so the assigned document is removed from the open queue

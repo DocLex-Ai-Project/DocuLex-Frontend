@@ -12,40 +12,42 @@ import {
   Paper,
   CircularProgress,
   Tooltip,
-  Dialog,
   IconButton,
   Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Dialog,
+  DialogContent,
+  LinearProgress,
+  Stack,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Description as DocIcon,
   Assessment as AIIcon,
+  AutoFixHigh as MagicIcon,
+  Visibility as VisibilityIcon,
+  Delete as DeleteIcon,
+  Gavel as GavelIcon,
+  MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteIcon from "@mui/icons-material/Delete";
-import GavelIcon from "@mui/icons-material/Gavel";
 
 import axiosInstance from "../../../utils/axiosInstance";
-import DialogView from "./DialogView"; // Make sure this import is correct
+import DialogView from "./DialogView";
 
 // ================= TYPES =================
-// (Keep all your existing types exactly as they were)
-type AiDecision = "LIKELY_VALID" | "NEEDS_REVIEW" | "INVALID" | "UNKNOWN";
+// Aligned with your provided Enum
+type DocumentStatus = "DRAFT" | "AI_REVIEWED" | "REVIEW_REQUESTED" | "APPROVED" | "REJECTED";
 
 interface AiResult {
   id: string;
-  decision: AiDecision;
   score: number;
   feedback: string;
-  createdAt: string;
-  documentId: string;
+  riskLevel?: string;
+  missingFields?: string[];
+  summary?: string;
 }
-
-type DocumentStatus = "DRAFT" | "AI_PROCESSING" | "AI_REVIEWED" | "REVIEW_REQUESTED" | "APPROVED" | "REJECTED";
 
 interface Document {
   id: string;
@@ -53,15 +55,6 @@ interface Document {
   source: "UPLOAD" | "MANUAL";
   status: DocumentStatus;
   createdAt: string;
-  content: string | null;
-  filePath: string | null;
-  userId: string;
-  lawyerId: string | null;
-  lawyerDecision: string | null;
-  lawyerFeedback: string | null;
-  lawyerSuggestion: string | null;
-  revisedContent: string | null;
-  reviewedAt: string | null;
   aiResult: AiResult | null;
 }
 
@@ -70,42 +63,32 @@ interface Document {
 const MyDocumentsPage = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Local state to track which ID is currently being processed by AI
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  // Menu State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
-  
-  // Dialog State
   const [DocID, setDocID] = useState<string>("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+const [aiData, setAiData] = useState<any>(null);
+const [aiLoading, setAiLoading] = useState(false);
+const [aiError, setAiError] = useState<string | null>(null);
 
   const open = Boolean(anchorEl);
 
-  // --- FIX 1: Properly open and close the menu ---
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, doc: Document) => {
     setAnchorEl(event.currentTarget);
     setSelectedDoc(doc);
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null); // This actually hides the menu!
+    setAnchorEl(null);
   };
 
-  // --- FIX 2: Close the menu when a button is clicked ---
-  const HandleView = () => {
-    if (selectedDoc) {
-      setDocID(selectedDoc.id);
-      setOpenDialog(true);
-    }
-    handleMenuClose(); // Close the menu when dialog opens
-  };
+  // --- API CALLS ---
 
-  const HandleDelete = () => {
-    console.log("Deleting document:", selectedDoc?.id);
-    handleMenuClose(); // Close menu after clicking delete
-  };
-
-  // API CALL
   const fetchDocuments = async () => {
     try {
       setLoading(true);
@@ -118,20 +101,49 @@ const MyDocumentsPage = () => {
     }
   };
 
+const handleRunAI = async () => {
+  if (!selectedDoc) return;
+
+  const currentId = selectedDoc.id;
+
+  handleMenuClose();
+  setAiDialogOpen(true);
+  setAiError(null); // reset error
+
+  if (selectedDoc.aiResult) {
+    setAiData(selectedDoc.aiResult);
+    return;
+  }
+
+  try {
+    setAiLoading(true);
+
+    const res = await axiosInstance.post(
+      `/api/documents/${currentId}/ai-review`
+    );
+
+    setAiData(res.data);
+  } catch (error: any) {
+    console.error("AI Review failed", error);
+
+    // ✅ capture backend error
+    setAiError(
+      error?.response?.data?.message ||
+      "AI service is currently unavailable"
+    );
+  } finally {
+    setAiLoading(false);
+  }
+};
+
   useEffect(() => {
     fetchDocuments();
   }, []);
 
   // ================= HELPERS =================
-  const cleanTitle = (title: string) => {
-    const parts = title.split("-");
-    return parts.length > 1 ? parts.slice(1).join("-") : title;
-  };
-
   const getStatusColor = (status: DocumentStatus) => {
     switch (status) {
       case "DRAFT": return "default";
-      case "AI_PROCESSING": return "warning";
       case "AI_REVIEWED": return "info";
       case "REVIEW_REQUESTED": return "secondary";
       case "APPROVED": return "success";
@@ -140,203 +152,203 @@ const MyDocumentsPage = () => {
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 50) return "text-yellow-600";
-    return "text-red-600";
-  };
-
-  // ================= UI =================
-
   return (
     <>
       <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50/50">
         
-        {/* HEADER */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>
-              My Documents
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#64748b", mt: 0.5 }}>
-              Manage your legal drafts and uploaded file
-            </Typography>
+            <Typography variant="h4" fontWeight="bold">My Documents</Typography>
+            <Typography variant="body2" color="textSecondary">Manage and analyze your legal files</Typography>
           </div>
-
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{
-              backgroundColor: "#4f46e5",
-              textTransform: "none",
-              fontWeight: 600,
-              padding: "8px 20px",
-              borderRadius: "8px",
-              "&:hover": { backgroundColor: "#4338ca" },
-            }}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} sx={{ backgroundColor: "#4f46e5" }}>
             Create Document
           </Button>
         </div>
 
-        {/* TABLE */}
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          className="border border-gray-200 shadow-sm rounded-xl overflow-hidden"
-        >
+        <TableContainer component={Paper} elevation={0} className="border border-gray-200 rounded-xl overflow-hidden">
           {loading ? (
-            <div className="flex justify-center items-center p-12">
-              <CircularProgress size={40} sx={{ color: "#4f46e5" }} />
-            </div>
+            <div className="flex justify-center p-12"><CircularProgress /></div>
           ) : (
             <Table>
               <TableHead sx={{ backgroundColor: "#f8fafc" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Document</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>AI</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Created</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
-                    Actions
-                  </TableCell>
+                  <TableCell>Document</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>AI Score</TableCell>
+                  <TableCell>Created</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {documents.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
-                      <Typography>No documents found.</Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  documents.map((doc) => (
+                {documents.map((doc) => {
+                  const isCurrentRowProcessing = processingId === doc.id;
+                  
+                  return (
                     <TableRow key={doc.id} hover>
-                      
-                      {/* TITLE */}
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-500">
-                            <DocIcon fontSize="small" />
-                          </div>
-                          <Typography fontWeight={500}>
-                            {cleanTitle(doc.title)}
-                          </Typography>
+                          <DocIcon color="action" />
+                          <Typography fontWeight={500}>{doc.title.split('-').pop()}</Typography>
                         </div>
                       </TableCell>
 
-                      {/* SOURCE */}
-                      <TableCell>
-                        <Typography variant="body2" sx={{ color: "#64748b" }}>
-                          {doc.source}
-                        </Typography>
-                      </TableCell>
-
-                      {/* STATUS */}
                       <TableCell>
                         <Chip
-                          label={doc.status.replace("_", " ")}
+                          label={isCurrentRowProcessing ? "ANALYZING..." : doc.status.replace("_", " ")}
                           size="small"
-                          color={getStatusColor(doc.status)}
+                          color={isCurrentRowProcessing ? "warning" : getStatusColor(doc.status)}
+                          icon={isCurrentRowProcessing ? <CircularProgress size={14} color="inherit" /> : undefined}
                         />
                       </TableCell>
 
-                      {/* AI RESULT */}
                       <TableCell>
                         {doc.aiResult ? (
-                          <Tooltip title={doc.aiResult.feedback} arrow>
-                            <div className="flex flex-col cursor-pointer">
-                              <div
-                                className={`flex items-center gap-1.5 font-bold ${getScoreColor(
-                                  doc.aiResult.score
-                                )}`}
-                              >
-                                <AIIcon fontSize="small" />
-                                {doc.aiResult.score}%
-                              </div>
-                              <Typography
-                                variant="caption"
-                                sx={{ color: "#64748b" }}
-                              >
-                                {doc.aiResult.decision}
-                              </Typography>
-                            </div>
-                          </Tooltip>
+                          <div className="flex items-center gap-1.5 font-bold text-indigo-600">
+                            <AIIcon fontSize="small" /> {doc.aiResult.score}%
+                          </div>
                         ) : (
-                          <Typography sx={{ color: "#94a3b8" }}>
-                            Pending
+                          <Typography variant="caption" color="textSecondary">
+                            {isCurrentRowProcessing ? "Calculating..." : "No Data"}
                           </Typography>
                         )}
                       </TableCell>
 
-                      {/* DATE */}
-                      <TableCell>
-                        {new Date(doc.createdAt).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{new Date(doc.createdAt).toLocaleDateString()}</TableCell>
 
-                      {/* ACTIONS */}
                       <TableCell align="right">
-                        <IconButton
-                          onClick={(e) => handleMenuOpen(e, doc)}
-                          size="small"
-                        >
+                        <IconButton onClick={(e) => handleMenuOpen(e, doc)} disabled={isCurrentRowProcessing}>
                           <MoreVertIcon />
                         </IconButton>
                       </TableCell>
-
                     </TableRow>
-                  ))
-                )}
+                  );
+                })}
               </TableBody>
             </Table>
           )}
         </TableContainer>
       </div>
 
-      {/* --- FIX 3: THE MENU MUST BE OUTSIDE THE TABLE LOOP --- */}
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleMenuClose} // Handles clicking outside the menu
-      >
-        <MenuItem onClick={HandleView}>
-          <ListItemIcon>
-            <VisibilityIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>View</ListItemText>
+      {/* --- PROCESSING OVERLAY DIALOG --- */}
+      <Dialog open={!!processingId} maxWidth="xs" fullWidth>
+        <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6">Running AI Legal Review</Typography>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+            Extracting clauses and validating legal compliance...
+          </Typography>
+          <LinearProgress />
+        </DialogContent>
+      </Dialog>
+
+      {/* --- ACTIONS MENU --- */}
+      <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+        <MenuItem onClick={() => { setDocID(selectedDoc!.id); setOpenDialog(true); handleMenuClose(); }}>
+          <ListItemIcon><VisibilityIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>View Details</ListItemText>
         </MenuItem>
 
-        {selectedDoc?.status === "AI_REVIEWED" && (
-          <MenuItem onClick={HandleView}>
-            <ListItemIcon>
-              <GavelIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Request Lawyer Review</ListItemText>
-          </MenuItem>
-        )}
-
+        {/* Only show "Run AI Review" if the document is in DRAFT status */}
         {selectedDoc?.status === "DRAFT" && (
-          <MenuItem onClick={HandleView}>
-            <ListItemText>Edit</ListItemText>
+          <MenuItem onClick={handleRunAI}>
+            <ListItemIcon><MagicIcon fontSize="small" color="primary" /></ListItemIcon>
+            <ListItemText sx={{ color: "#4f46e5", fontWeight: 600 }}>Run AI Review</ListItemText>
           </MenuItem>
         )}
 
-        <MenuItem onClick={HandleDelete}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText sx={{ color: "red" }}>Delete</ListItemText>
+        {selectedDoc?.status === "AI_REVIEWED" && (
+          <MenuItem onClick={handleMenuClose}>
+            <ListItemIcon><GavelIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Request Lawyer Signature</ListItemText>
+          </MenuItem>
+        )}
+
+        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+          <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+          <ListItemText>Delete</ListItemText>
         </MenuItem>
       </Menu>
 
-      {/* DIALOG COMPONENT */}
-      {/* Assuming DialogView is your actual component, not the MUI Dialog */}
       <DialogView open={openDialog} close={() => setOpenDialog(false)} id={DocID} />
-      
+
+
+   <Dialog open={aiDialogOpen} onClose={() => setAiDialogOpen(false)} maxWidth="md" fullWidth>
+  <DialogContent>
+
+    {/* 🔄 LOADING */}
+    {aiLoading && (
+      <div style={{ textAlign: "center", padding: 20 }}>
+        <CircularProgress />
+        <Typography mt={2}>Analyzing document...</Typography>
+      </div>
+    )}
+
+    {/* ❌ ERROR */}
+    {!aiLoading && aiError && (
+      <div style={{ textAlign: "center", padding: 20 }}>
+        <Typography variant="h6" color="error">
+          AI Analysis Failed
+        </Typography>
+
+        <Typography mt={1} color="textSecondary">
+          {aiError}
+        </Typography>
+
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={handleRunAI}
+        >
+          Try Again
+        </Button>
+      </div>
+    )}
+
+    {/* ✅ RESULT */}
+    {!aiLoading && !aiError && aiData && (
+      <>
+        {/* SCORE */}
+        <Typography variant="h6">AI Score</Typography>
+        <LinearProgress
+          variant="determinate"
+          value={aiData.score}
+          sx={{ height: 10, borderRadius: 5, mt: 1 }}
+        />
+        <Typography>{aiData.score}%</Typography>
+
+        {/* RISK */}
+        <Typography mt={2} variant="h6">Risk Level</Typography>
+        <Chip
+          label={aiData.riskLevel}
+          color={
+            aiData.riskLevel === "LOW"
+              ? "success"
+              : aiData.riskLevel === "MEDIUM"
+              ? "warning"
+              : "error"
+          }
+        />
+
+        {/* MISSING */}
+        <Typography mt={2} variant="h6">Missing Clauses</Typography>
+        <Stack direction="row" flexWrap="wrap" gap={1}>
+          {aiData.missingFields?.map((f: string, i: number) => (
+            <Chip key={i} label={f} />
+          ))}
+        </Stack>
+
+        {/* SUMMARY */}
+        <Typography mt={2} variant="h6">Summary</Typography>
+        <Typography>{aiData.summary}</Typography>
+      </>
+    )}
+
+  </DialogContent>
+</Dialog>
     </>
   );
 };
 
-export default MyDocumentsPage;
+export default MyDocumentsPage; 

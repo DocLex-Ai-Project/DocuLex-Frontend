@@ -43,12 +43,10 @@ const LawyerDashboard = () => {
     rejected: 0,
   });
 
-  // ================= FETCH DATA =================
-
   const fetchReviewQueue = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/api/documents/review-queue");
+      const res = await axiosInstance.get("/api/lawyer/review-queue");
       setDocuments(res.data);
     } catch (error) {
       console.error(error);
@@ -60,7 +58,7 @@ const LawyerDashboard = () => {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await axiosInstance.get("/api/documents/analytics");
+      const res = await axiosInstance.get("/api/lawyer/analytics");
       setAnalytics(res.data);
     } catch (error) {
       console.error(error);
@@ -71,7 +69,7 @@ const LawyerDashboard = () => {
 
   const handleReview = async (id: string, decision: "APPROVED" | "REJECTED") => {
     try {
-      await axiosInstance.post(`/api/documents/${id}/review`, {
+      await axiosInstance.post(`/api/lawyer/${id}/review`, {
         decision,
         comment:
           decision === "APPROVED"

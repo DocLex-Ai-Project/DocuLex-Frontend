@@ -76,7 +76,7 @@ const MyAssignmentsPage = () => {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/api/documents/my-assignments");
+      const res = await axiosInstance.get("/api/lawyer/my-assignments");
       setAssignments(res.data);
     } catch (error) {
       console.error("Failed to fetch assigned documents", error);
@@ -98,7 +98,7 @@ const MyAssignmentsPage = () => {
     try {
       setSubmitting(true);
       
-     const response= await axiosInstance.patch(`/api/documents/${selectedDocId}/decision`, {
+     const response= await axiosInstance.patch(`/api/lawyer/${selectedDocId}/decision`, {
         decision, 
         feedback,
       });

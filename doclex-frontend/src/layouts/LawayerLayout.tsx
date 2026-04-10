@@ -7,6 +7,7 @@ import LawayerSidebar from "../components/navigation/User/Lawayer/LawayerSidebar
 import UserNavbar from "../components/navigation/User/ UserNavbar";
 
 import { lightTheme, darkTheme } from "../index.mui";
+import Chatbot from "../components/Chatbot/Chatbot";
 
 const LawayerLayout = () => {
 
@@ -46,7 +47,7 @@ animation="default"
 </Suspense>
 
 </main>
-
+<Chatbot />
 </div>
 
 </div>

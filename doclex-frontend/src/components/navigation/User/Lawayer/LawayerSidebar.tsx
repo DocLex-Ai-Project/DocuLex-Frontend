@@ -39,16 +39,16 @@ label:"Cases",
 icon:<Scale size={20}/>,
 path:"/lawyer/cases"
 },
-{
-label:"Documents",
-icon:<FileText size={20}/>,
-path:"/lawyer/documents"
-},
-{
-label:"Settings",
-icon:<Settings size={20}/>,
-path:"/lawyer/settings"
-}
+// {
+// label:"Documents",
+// icon:<FileText size={20}/>,
+// path:"/lawyer/documents"
+// },
+// {
+// label:"Settings",
+// icon:<Settings size={20}/>,
+// path:"/lawyer/settings"
+// }
 ];
 
 return (

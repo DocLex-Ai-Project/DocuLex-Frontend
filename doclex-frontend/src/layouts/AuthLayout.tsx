@@ -29,7 +29,7 @@ const AuthLayout = () => {
             mb: 2,
           }}
         >
-          DocLex
+          DocuLex
         </Typography>
 
         <Typography

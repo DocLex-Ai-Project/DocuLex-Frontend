@@ -35,9 +35,8 @@ import {
 
 import axiosInstance from "../../../utils/axiosInstance";
 import DialogView from "./DialogView";
+import { enqueueSnackbar } from "notistack";
 
-// ================= TYPES =================
-// Aligned with your provided Enum
 type DocumentStatus = "DRAFT" | "AI_REVIEWED" | "REVIEW_REQUESTED" | "APPROVED" | "REJECTED";
 
 interface AiResult {
@@ -126,7 +125,6 @@ const handleRunAI = async () => {
   } catch (error: any) {
     console.error("AI Review failed", error);
 
-    // ✅ capture backend error
     setAiError(
       error?.response?.data?.message ||
       "AI service is currently unavailable"
@@ -140,7 +138,7 @@ const handleRunAI = async () => {
     fetchDocuments();
   }, []);
 
-  // ================= HELPERS =================
+ 
   const getStatusColor = (status: DocumentStatus) => {
     switch (status) {
       case "DRAFT": return "default";
@@ -151,6 +149,25 @@ const handleRunAI = async () => {
       default: return "default";
     }
   };
+  const HandleRequestLawayer=(id:string)=>{
+    if(!id){
+      enqueueSnackbar("Failed To fetch the id please try again later",{variant:'warning'})
+    }
+    try{
+      const res=axiosInstance.post(`api/documents/${id}/request-review`)
+      console.log("This is response from res  doucments",res);
+      fetchDocuments();
+      enqueueSnackbar("Requested has been Created Sucessfully",{variant:'success'});
+    }
+    catch(err){
+      console.log("This error from the err",err);
+
+
+    }
+    // console.log("this is id",id)
+    // enqueueSnackbar("This is id",{variant:'default'});
+
+  }
 
   return (
     <>
@@ -258,13 +275,16 @@ const handleRunAI = async () => {
           </MenuItem>
         )}
 
-        {selectedDoc?.status === "AI_REVIEWED" && (
-          <MenuItem onClick={handleMenuClose}>
-            <ListItemIcon><GavelIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Request Lawyer Signature</ListItemText>
-          </MenuItem>
-        )}
-
+       {selectedDoc?.status === "AI_REVIEWED" && (
+  <MenuItem>
+    <ListItemIcon>
+      <GavelIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText onClick={() => HandleRequestLawayer(selectedDoc.id)}>
+      Request Lawyer Signature
+    </ListItemText>
+  </MenuItem>
+)}
         <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
           <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
           <ListItemText>Delete</ListItemText>
@@ -277,7 +297,7 @@ const handleRunAI = async () => {
    <Dialog open={aiDialogOpen} onClose={() => setAiDialogOpen(false)} maxWidth="md" fullWidth>
   <DialogContent>
 
-    {/* 🔄 LOADING */}
+
     {aiLoading && (
       <div style={{ textAlign: "center", padding: 20 }}>
         <CircularProgress />
@@ -285,7 +305,7 @@ const handleRunAI = async () => {
       </div>
     )}
 
-    {/* ❌ ERROR */}
+  
     {!aiLoading && aiError && (
       <div style={{ textAlign: "center", padding: 20 }}>
         <Typography variant="h6" color="error">
@@ -306,7 +326,6 @@ const handleRunAI = async () => {
       </div>
     )}
 
-    {/* ✅ RESULT */}
     {!aiLoading && !aiError && aiData && (
       <>
         {/* SCORE */}

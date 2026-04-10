@@ -34,13 +34,13 @@ const drawerWidth = 260;
 const collapsedWidth = 72;
 
 const navItems = [
-{ text: "Dashboard", icon: <Dashboard />, path: "/user" },
+// { text: "Dashboard", icon: <Dashboard />, path: "/user" },
 
 { text: "Create / Upload Document", icon: <Description />, path: "/user/create" },
 
 { text: "My Documents", icon: <FolderShared />, path: "/user/documents" },
 
-{ text: "Settings", icon: <Settings />, path: "/user/settings" },
+// { text: "Settings", icon: <Settings />, path: "/user/settings" },
 
 { text: "Logout", icon: <Logout />, path: "/logout" }
 ];

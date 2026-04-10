@@ -82,7 +82,7 @@ const [previewOpen, setPreviewOpen] = useState(false);
     }
   };
 
-  // --- HELPERS ---
+ 
   const cleanTitle = (title: string) => {
     const parts = title.split("-");
     return parts.length > 1 ? parts.slice(1).join("-") : title;

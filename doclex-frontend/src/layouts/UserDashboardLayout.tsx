@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import UserSidebar from "../components/navigation/User/UserSidebar";
 import UserNavbar from "../components/navigation/User/ UserNavbar";
+import Chatbot from "../components/Chatbot/Chatbot";
 
 const UserDashboardLayout = () => {
   return (
@@ -19,7 +20,9 @@ const UserDashboardLayout = () => {
         {/* Scrollable Content Area for your pages */}
         <main className="flex-1 overflow-y-auto p-6 relative">
           <Outlet />
+
         </main>
+        <Chatbot/>
 
       </div>
       

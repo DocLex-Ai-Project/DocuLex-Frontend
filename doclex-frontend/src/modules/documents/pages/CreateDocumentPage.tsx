@@ -6,19 +6,36 @@ import { enqueueSnackbar } from 'notistack';
 const CreateDocumentPage = () => {
   const [documentContent, setDocumentContent] = useState('');
   
-  // File Upload State and Ref
+
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSaveDraft = () => {
-    if (!documentContent) {
-      alert("Cannot save! Please type a draft first.");
-      return;
-    }
-    console.log("Draft content:", documentContent);
-    alert("Draft saved successfully!");
-  };
+const handleSaveDraft = async () => {
+  if (!documentContent) {
+    alert("Cannot save! Please type a draft first.");
+    return;
+  }
 
+  try {
+    const res = await axiosInstance.post("/api/documents/create", {
+      title: "Untitled Document",
+      content: documentContent,
+    });
+
+    console.log("Saved document:", res.data);
+
+    enqueueSnackbar("Draft saved successfully!", {
+      variant: "success",
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    enqueueSnackbar("Failed to save draft", {
+      variant: "error",
+    });
+  }
+};
   // --- NEW: Dedicated API Upload Handler ---
   const handleUploadFile = async() => {
     if (!uploadedFile) {

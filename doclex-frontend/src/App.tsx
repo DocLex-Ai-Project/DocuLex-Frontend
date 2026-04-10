@@ -1,7 +1,6 @@
 import React from "react";
 import { AppProviders } from "./context/GlobalProvider";
 import AppRoutes from "./routes/AppRoutes";
-
 const App = () => {
 
 // later need to complusory
@@ -37,6 +36,7 @@ const App = () => {
   return (
     // <AppProviders>
       <AppRoutes />
+
     // </AppProviders>
   );
 };

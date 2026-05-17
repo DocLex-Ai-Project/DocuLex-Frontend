@@ -28,7 +28,7 @@ const LoginPage = () => {
       </Typography>
 
       <Typography variant="body2" sx={{ color: "text.secondary", mb: 4 }}>
-        Sign in to continue using DocLex
+        Sign in to continue using DocuLex
       </Typography>
 
       <LoginForm />

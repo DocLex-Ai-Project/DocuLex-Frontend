@@ -24,11 +24,11 @@ window.location.href = "/";
 };
 
 const navItems = [
-{
-label:"Dashboard",
-icon:<LayoutDashboard size={20}/>,
-path:"/lawyer"
-},
+// {
+// label:"Dashboard",
+// icon:<LayoutDashboard size={20}/>,
+// path:"/lawyer"
+// },
 {
 label:"Review Requests",
 icon:<Bot size={20}/>,

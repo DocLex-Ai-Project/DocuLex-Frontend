@@ -50,21 +50,21 @@ const SignupPage = () => {
       <Divider sx={{ my: 3 }} />
 
       {/* Login Link */}
-      <Typography
-        variant="body2"
-        textAlign="center"
-        sx={{ color: "text.secondary" }}
-      >
-        Already have an account?{" "}
-        <Link
-          component={RouterLink}
-          to=""
-          underline="hover"
-          sx={{ fontWeight: 600 }}
-        >
-          Sign in
-        </Link>
-      </Typography>
+     <Typography
+  variant="body2"
+  textAlign="center"
+  sx={{ color: "text.secondary" }}
+>
+  Already have an account?{" "}
+  <Link
+    component={RouterLink}
+    to="/"
+    underline="hover"
+    sx={{ fontWeight: 600 }}
+  >
+    Sign in
+  </Link>
+</Typography>
     </Box>
   );
 };

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import axiosInstance from "../../../utils/axiosInstance";
 
 type FormValues = {
   name: string;
@@ -19,7 +20,11 @@ type FormValues = {
 };
 
 const SignupForm = () => {
-  const { handleSubmit, control } = useForm<FormValues>({
+  const {
+    handleSubmit,
+    control,
+    reset,
+  } = useForm<FormValues>({
     defaultValues: {
       name: "",
       email: "",
@@ -31,12 +36,42 @@ const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = (data: FormValues) => {
-    setLoading(true);
+  const onSubmit = async (data: FormValues) => {
+    try {
+      setLoading(true);
 
-    console.log(data);
+      const firstName = data.name.split(" ")[0] || "";
 
-    setTimeout(() => setLoading(false), 1000);
+      const lastName =
+        data.name.split(" ").slice(1).join(" ") || "User";
+
+      const response = await axiosInstance.post(
+        "/api/auth/register",
+        {
+          firstName,
+          lastName,
+          email: data.email,
+          password: data.password,
+          role: data.role,
+        }
+      );
+
+      console.log("Register Success:", response.data);
+
+      alert("Account created successfully!");
+
+      reset();
+
+    } catch (error: any) {
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message ||
+          "Registration failed"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -105,9 +140,15 @@ const SignupForm = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() =>
+                        setShowPassword(!showPassword)
+                      }
                     >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -150,17 +191,23 @@ const SignupForm = () => {
             textTransform: "none",
             fontWeight: 600,
             fontSize: 15,
-            background: "linear-gradient(135deg,#6366f1,#4f46e5)",
-            boxShadow: "0 10px 30px rgba(99,102,241,0.35)",
+            background:
+              "linear-gradient(135deg,#6366f1,#4f46e5)",
+            boxShadow:
+              "0 10px 30px rgba(99,102,241,0.35)",
 
             "&:hover": {
               transform: "translateY(-2px)",
-              boxShadow: "0 15px 40px rgba(99,102,241,0.45)",
-              background: "linear-gradient(135deg,#4f46e5,#4338ca)",
+              boxShadow:
+                "0 15px 40px rgba(99,102,241,0.45)",
+              background:
+                "linear-gradient(135deg,#4f46e5,#4338ca)",
             },
           }}
         >
-          {loading ? "Creating account..." : "Create Account"}
+          {loading
+            ? "Creating account..."
+            : "Create Account"}
         </Button>
 
       </Stack>
